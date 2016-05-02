@@ -20,7 +20,7 @@ std_msgs::Float64MultiArray navigationcorners;
 Eigen::MatrixXd eigennavigationcorners(10,13);
 
 void Path_Recieved(nav_msgs::Path Path) {
-	navigationscorners.data.clear();
+	navigationcorners.data.clear();
 	int k,x;
 	ROS_INFO_STREAM("Path Recieved!");
 	ROS_INFO_STREAM("Path length: "<< Path.poses.size());

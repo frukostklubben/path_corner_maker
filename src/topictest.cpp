@@ -14,30 +14,31 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <tf/tf.h>
 
-visualization_msgs::Marker marker;
+//These are globally defined to make it easier to fetch from both callback and main, may the gods of programming smite me and my heresy
+visualization_msgs::Marker marker; 
 float kinectheight=0;
 std_msgs::Float64MultiArray navigationcorners;
-Eigen::MatrixXd eigennavigationcorners(10,13);
+Eigen::MatrixXd eigennavigationcorners(10,13); //Use for simplicity, converted later on. Maximum points that we extract from the path is 10
 
-void Path_Recieved(nav_msgs::Path Path) {
+void Path_Recieved(nav_msgs::Path Path) { //When a path is recieved
 	navigationcorners.data.clear();
 	int k,x;
 	ROS_INFO_STREAM("Path Recieved!");
 	ROS_INFO_STREAM("Path length: "<< Path.poses.size());
-	if(Path.poses.size()<10){
+	if(Path.poses.size()<10){ //If path is shorter than 10 points, set values used in the for-loop
 		x=Path.poses.size();
 		eigennavigationcorners.resize(x,13);
 	}
-	else{
+	else{ //Ensuring no more than 10 points are being taken from the Path at any length
 		x=10;	
 		eigennavigationcorners.resize(10,13);
  	}			
-	for (int i=0; i<x; i++){
+	for (int i=0; i<x; i++){ //Looping through all the points in the path
 		if(Path.poses.size()<10)
-			k=i;			
+			k=i;//For lengths<10, take all points			
 		else
-			k=(Path.poses.size()/10*(i+1))-1;
-		
+			k=(Path.poses.size()/10*(i+1))-1; //For lengts>10, take 10 points (somewhat) evenly distributet along the path, with the last point always as the last
+		//Making 4 corners for each point
 		eigennavigationcorners(i,0)=Path.poses[k].pose.position.x-0.1;
 		eigennavigationcorners(i,1)=Path.poses[k].pose.position.y-0.1;
 		eigennavigationcorners(i,2)=-kinectheight;
@@ -54,6 +55,7 @@ void Path_Recieved(nav_msgs::Path Path) {
 		eigennavigationcorners(i,10)=Path.poses[k].pose.position.y+0.1;
 		eigennavigationcorners(i,11)=-kinectheight;
 	}
+	//Make a marker for the last point in the path (used for debugging)
 	marker.header.frame_id= "map";
 	marker.header.stamp=ros::Time();
 	marker.ns="goal";
@@ -75,16 +77,17 @@ void Path_Recieved(nav_msgs::Path Path) {
 	marker.color.r=255.0;
 	marker.color.g=0.0;
 	marker.color.b=0.0;
-	tf::matrixEigenToMsg(eigennavigationcorners, navigationcorners);
+	tf::matrixEigenToMsg(eigennavigationcorners, navigationcorners); //Convert to ros-compatible publish-format
 
 			
 }
-void Poses_Recieved(geometry_msgs::PoseArray PeoplePoses) {
+void Poses_Recieved(geometry_msgs::PoseArray PeoplePoses) { //If poses recieved (only used during development)
 	ROS_INFO_STREAM("Position recieved: x: " << PeoplePoses.poses[0].position.x<< ", y: "<< PeoplePoses.poses[0].position.y<< ", z: "<<PeoplePoses.poses[0].position.z);
 			
 }
 
 int main(int argc, char** argv){
+//Main: Creating node, publishers, subscribers and then forever looping the callbacks
 	ros::init(argc, argv, "topictest");
 	ros::NodeHandle nh;
 	ros::Publisher marker_pub=nh.advertise<visualization_msgs::Marker>("visualization_marker",1000);
