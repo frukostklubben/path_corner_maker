@@ -1,5 +1,5 @@
 <package>
-  <name>PathCornerCreator</name>
+  <name>path_corner_creator</name>
   <version>0.1.0</version>
   <description>Node that created 4 corners around each point in a path </description>
   <author email="andreas.lofman@hotmail.com">Andreas Löfman</author>
