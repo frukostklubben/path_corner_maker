@@ -19,7 +19,7 @@
 visualization_msgs::Marker marker; 
 float kinectheight=0.92;
 
-//tf::TransformListener transformer;
+tf::TransformListener transformer;
 
 std_msgs::Float64MultiArray navigationcorners;
 Eigen::MatrixXd eigennavigationcorners(10,14); //Use for simplicity, converted later on. Maximum points that we extract from the path is 10
